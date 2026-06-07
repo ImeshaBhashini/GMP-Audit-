@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0BA5A5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ansell GMP" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>Ansell GMP Audit</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #0BA5A5;
+      --primary2: #07C4C4;
+      --bg: #F0F9FF;
+      --card: #E0F7FA;
+      --border: #B2EBF2;
+      --tp: #0C4A6E;
+      --ts: #0891B2;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      --white: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); overflow: hidden; }
+    #app { height: 100%; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.15); }
+
+    /* ── Screens ── */
+    .screen { display: none; flex-direction: column; height: 100%; }
+    .screen.active { display: flex; }
+
+    /* ── HOME ── */
+    #home { background: linear-gradient(160deg, #0BA5A5 0%, #0369a1 100%); padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+    .home-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 56px 28px 40px; gap: 0; }
+    .brand-box { text-align: center; margin-bottom: 16px; }
+    .brand-word { font-size: 58px; font-weight: 900; color: #fff; letter-spacing: -3px; line-height: 1; }
+    .brand-line { width: 120px; height: 3px; background: rgba(255,255,255,0.45); border-radius: 2px; margin: 8px auto; }
+    .brand-tag { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 2.5px; }
+    .title-box { text-align: center; margin-bottom: 40px; }
+    .rule { width: 48px; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; margin: 0 auto 20px; }
+    .title-main { font-size: 32px; font-weight: 800; color: #fff; line-height: 1.15; letter-spacing: -0.5px; }
+    .title-sub { font-weight: 600; opacity: 0.75; }
+    .title-desc { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 10px; line-height: 1.6; }
+    .cta-box { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+    .start-btn { width: 100%; background: #fff; border: none; border-radius: 14px; padding: 18px; font-size: 17px; font-weight: 800; color: #0A9494; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.2); font-family: 'DM Sans', sans-serif; transition: transform 0.1s, opacity 0.1s; }
+    .start-btn:active { transform: scale(0.98); opacity: 0.9; }
+    .item-count { font-size: 11px; color: rgba(255,255,255,0.45); text-align: center; }
+
+    /* ── TOP BAR ── */
+    .top-bar { background: var(--primary); padding: 12px 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-top: calc(12px + env(safe-area-inset-top)); }
+    .back-btn { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 18px; flex-shrink: 0; font-family: 'DM Sans', sans-serif; }
+    .tb-info { flex: 1; }
+    .tb-title { font-size: 14px; font-weight: 700; color: #fff; }
+    .tb-sub { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 1px; }
+    .tb-badge { font-size: 15px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+    .nav-icon-btn { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 16px; position: relative; font-family: 'DM Sans', sans-serif; }
+    .nav-badge { position: absolute; top: -4px; right: -4px; background: var(--error); border-radius: 8px; padding: 1px 4px; min-width: 16px; font-size: 9px; font-weight: 700; color: #fff; text-align: center; }
+
+    /* ── SCROLL CONTENT ── */
+    .scroll-content { flex: 1; overflow-y: auto; padding: 14px 14px 30px; }
+    .scroll-content::-webkit-scrollbar { display: none; }
+
+    /* ── CARDS ── */
+    .card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 0.5px solid var(--border); }
+    .card-title { font-size: 11px; font-weight: 700; color: var(--tp); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+
+    /* ── CATEGORY SELECT ── */
+    .audit-all-btn { background: var(--primary); border: none; border-radius: 12px; padding: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; cursor: pointer; width: 100%; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .audit-all-btn:active { opacity: 0.85; }
+    .audit-all-txt { font-size: 14px; font-weight: 700; color: #fff; }
+    .cat-item { background: #fff; border-radius: 12px; padding: 14px 14px 14px 18px; border: 0.5px solid #E0F7FA; display: flex; align-items: center; margin-bottom: 8px; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.1s; }
+    .cat-item:active { transform: scale(0.99); }
+    .cat-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 12px 0 0 12px; }
+    .cat-info { flex: 1; margin-left: 8px; }
+    .cat-name { font-size: 13px; font-weight: 700; color: var(--tp); }
+    .cat-meta { font-size: 11px; color: var(--ts); margin-top: 2px; }
+    .mini-bar { height: 3px; background: #E0F7FA; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+    .mini-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+    .status-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-left: 8px; white-space: nowrap; }
+    .cat-arrow { color: #CBD5E1; font-size: 18px; margin-left: 6px; }
+
+    /* ── AUDIT SCREEN ── */
+    .h-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 0.5px solid var(--border); }
+    .prog-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .prog-label { font-size: 11px; color: var(--ts); font-weight: 600; }
+    .prog-pct { font-size: 11px; color: var(--primary); font-weight: 700; }
+    .p-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+    .p-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.3s; }
+    .badges-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    .c-badge { display: flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 14px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .s-badge { background: rgba(0,0,0,0.07); padding: 2px 8px; border-radius: 10px; font-size: 10px; color: #555; }
+    .q-label { font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .q-text { font-size: 14px; line-height: 1.6; font-weight: 500; color: var(--tp); }
+    .ans-btn { border: 1.5px solid; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: transparent; width: 100%; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+    .ans-btn.selected { }
+    .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .radio-check { color: #fff; font-size: 12px; display: none; }
+    .ans-btn.selected .radio-check { display: block; }
+    .ans-label { font-size: 13px; font-weight: 600; flex: 1; text-align: left; }
+    .na-btn { border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: transparent; width: 100%; font-family: 'DM Sans', sans-serif; }
+    .na-btn.selected { background: #F1F5F9; border-color: #94A3B8; }
+    .na-radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #CBD5E1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; color: #94A3B8; }
+
+    /* ── PHOTO & NOTE ── */
+    .photo-section { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px dashed var(--border); }
+    .photo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .photo-title { font-size: 10px; font-weight: 700; color: var(--ts); text-transform: uppercase; letter-spacing: 0.5px; }
+    .photo-count { font-size: 10px; color: #94A3B8; }
+    .photo-btns { display: flex; gap: 8px; margin-bottom: 8px; }
+    .photo-btn { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--primary); background: #fff; font-size: 12px; font-weight: 600; color: var(--primary); cursor: pointer; font-family: 'DM Sans', sans-serif; text-align: center; }
+    .photo-btn:active { background: var(--card); }
+    .photo-thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .photo-thumb-wrap { position: relative; width: 68px; height: 68px; }
+    .photo-thumb { width: 68px; height: 68px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; }
+    .photo-del { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; background: var(--error); display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; color: #fff; font-size: 10px; font-weight: 700; }
+    .note-input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-size: 12px; color: var(--tp); background: var(--bg); min-height: 52px; resize: none; font-family: 'DM Sans', sans-serif; margin-top: 6px; outline: none; }
+    .note-count { font-size: 9px; color: #94A3B8; text-align: right; margin-top: 2px; }
+
+    /* ── NAV BUTTONS ── */
+    .nav-row { display: flex; gap: 10px; margin-top: 4px; }
+    .nv-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .nv-btn:disabled { opacity: 0.4; }
+    .nv-btn:active { opacity: 0.85; }
+
+    /* ── TAB BAR ── */
+    .tab-bar { height: 56px; background: #E0F7FA; border-top: 0.5px solid var(--border); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+    .t-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: none; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .t-btn .t-icon { font-size: 20px; }
+    .t-btn .t-label { font-size: 10px; color: var(--ts); }
+    .t-btn.active .t-label { color: var(--primary); font-weight: 700; }
+
+    /* ── NAVIGATOR PANEL ── */
+    .nav-panel { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 30; display: flex; flex-direction: column; }
+    .np-header { background: var(--primary); padding: 14px; display: flex; align-items: center; gap: 10px; padding-top: calc(14px + env(safe-area-inset-top)); }
+    .np-title { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+    .np-sub { font-size: 10px; color: rgba(255,255,255,0.7); }
+    .np-close { background: rgba(255,255,255,0.2); border: none; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 18px; font-family: 'DM Sans', sans-serif; }
+    .np-legend { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: var(--card); border-bottom: 0.5px solid var(--border); }
+    .np-legend-item { display: flex; align-items: center; gap: 3px; }
+    .np-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .np-legend-txt { font-size: 9px; color: var(--ts); font-weight: 600; }
+    .np-scroll { flex: 1; overflow-y: auto; padding: 8px; }
+    .np-cat-hd { display: flex; align-items: center; justify-content: space-between; padding: 6px; border-radius: 8px; margin-bottom: 6px; }
+    .np-cat-name { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; flex: 1; }
+    .np-cat-cnt { font-size: 9px; font-weight: 700; }
+    .np-sub-hd { font-size: 10px; font-weight: 600; color: var(--ts); margin-left: 4px; margin-bottom: 4px; margin-top: 6px; }
+    .np-q-grid { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 2px; margin-bottom: 4px; }
+    .np-q-btn { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 9px; font-weight: 700; background: #F8FAFC; border-color: #CBD5E1; color: #94A3B8; font-family: 'DM Sans', sans-serif; position: relative; transition: transform 0.1s; }
+    .np-q-btn:active { transform: scale(0.95); }
+    .np-q-btn.current { box-shadow: 0 0 0 3px var(--primary); }
+    .np-q-btn .photo-dot { position: absolute; bottom: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
+
+    /* ── MODAL ── */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: none; align-items: flex-end; }
+    .modal-bg.open { display: flex; }
+    .modal-sheet { background: var(--bg); border-radius: 20px 20px 0 0; padding: 18px; max-height: 90%; overflow-y: auto; width: 100%; max-width: 480px; margin: 0 auto; padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--tp); }
+    .modal-close { background: var(--card); border: none; border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ts); font-size: 16px; font-family: 'DM Sans', sans-serif; }
+    .score-hero { border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 14px; }
+    .score-lbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .score-num { font-size: 52px; font-weight: 800; }
+    .score-status { font-size: 13px; font-weight: 600; margin-top: 4px; }
+
+    /* ── RESULTS ── */
+    .q-detail-card { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 7px; border-left: 3px solid; border: 0.5px solid var(--border); }
+    .q-detail-sub { font-size: 9px; font-weight: 600; color: var(--ts); margin-bottom: 3px; }
+    .q-detail-text { font-size: 12px; color: var(--tp); line-height: 1.5; margin-bottom: 6px; }
+    .ans-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .summary-row { display: flex; justify-content: space-between; padding: 4px 0; }
+    .cat-breakdown { display: flex; flex-direction: column; gap: 8px; }
+    .cat-bd-item { background: var(--card); border-radius: 10px; padding: 10px 12px; border: 0.5px solid var(--border); }
+    .cat-bd-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .cat-bd-name { font-size: 13px; font-weight: 700; color: var(--tp); }
+    .cat-bd-scores { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    /* ── SETTINGS TAB ── */
+    .settings-logo { background: var(--primary); border-radius: 14px; padding: 18px; text-align: center; margin-bottom: 12px; }
+    .settings-logo-name { font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .settings-logo-line { width: 70px; height: 2px; background: rgba(255,255,255,0.5); border-radius: 2px; margin: 6px auto 8px; }
+    .settings-logo-sub { font-size: 13px; font-weight: 700; color: #fff; }
+    .prog-stat-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 0.5px solid #F0F9FF; }
+    .prog-stat-label { font-size: 12px; color: var(--ts); }
+    .prog-stat-val { font-size: 13px; font-weight: 700; }
+
+    /* ── CAT RESULT ── */
+    .cat-score-hero { border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 14px; }
+
+    /* ── UTILS ── */
+    .hidden { display: none !important; }
+    .flex-row { display: flex; align-items: center; }
+    .gap-6 { gap: 6px; }
+    .mt-6 { margin-top: 6px; }
+
+    /* Animations */
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .screen.active { animation: slideUp 0.2s ease-out; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════════════════════════ HOME ══════════════════════════════ -->
+  <div id="home" class="screen active">
+    <div class="home-scroll">
+      <div class="brand-box">
+        <div class="brand-word">Ansell</div>
+        <div class="brand-line"></div>
+        <div class="brand-tag">PROTECTION SOLUTIONS</div>
+      </div>
+      <div class="title-box">
+        <div class="rule"></div>
+        <div class="title-main">GMP Audit<br><span class="title-sub">Checklist</span></div>
+        <div class="title-desc">Good Manufacturing Practice<br>Compliance Evaluation Tool</div>
+      </div>
+      <div class="cta-box">
+        <button class="start-btn" onclick="goTo('catselect')">▶  Begin Audit</button>
+        <div class="item-count" id="home-count"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ CATEGORY SELECT ══════════════════════════ -->
+  <div id="catselect" class="screen" style="background:var(--bg);">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goTo('home')">←</button>
+      <div class="tb-info">
+        <div class="tb-title">Select Category</div>
+        <div class="tb-sub" id="cs-answered-lbl">0 of 0 answered total</div>
+      </div>
+      <div class="tb-badge">Ansell</div>
+    </div>
+    <div class="scroll-content" id="catselect-content"></div>
+  </div>
+
+  <!-- ══════════════════════════ AUDIT SCREEN ══════════════════════════ -->
+  <div id="audit" class="screen" style="background:var(--bg);">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goTo('catselect')">←</button>
+      <div class="tb-info">
+        <div class="tb-title" id="audit-title"></div>
+        <div class="tb-sub" id="audit-sub"></div>
+      </div>
+      <div class="tb-badge">Ansell</div>
+      <button class="nav-icon-btn" id="nav-open-btn" onclick="openNavPanel()">
+        ☰
+        <span class="nav-badge hidden" id="nav-badge"></span>
+      </button>
+    </div>
+
+    <!-- Tab content -->
+    <div id="audit-tab-content" style="flex:1;overflow:hidden;display:flex;flex-direction:column;"></div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="t-btn active" id="tab-audit" onclick="switchTab('audit')">
+        <span class="t-icon">📋</span>
+        <span class="t-label">Audit</span>
+      </button>
+      <button class="t-btn" id="tab-settings" onclick="switchTab('settings')">
+        <span class="t-icon">⚙️</span>
+        <span class="t-label">Settings</span>
+      </button>
+    </div>
+
+    <!-- Navigator Panel -->
+    <div class="nav-panel hidden" id="nav-panel">
+      <div class="np-header">
+        <div>
+          <div class="np-title">Question Navigator</div>
+          <div class="np-sub" id="nav-panel-sub"></div>
+        </div>
+        <button class="np-close" onclick="closeNavPanel()">✕</button>
+      </div>
+      <div class="np-legend">
+        <div class="np-legend-item"><div class="np-legend-dot" style="background:#10B981"></div><span class="np-legend-txt">Comply</span></div>
+        <div class="np-legend-item"><div class="np-legend-dot" style="background:#F59E0B"></div><span class="np-legend-txt">Partial</span></div>
+        <div class="np-legend-item"><div class="np-legend-dot" style="background:#EF4444"></div><span class="np-legend-txt">Not Comply</span></div>
+        <div class="np-legend-item"><div class="np-legend-dot" style="background:#94A3B8"></div><span class="np-legend-txt">N/A</span></div>
+        <div class="np-legend-item"><div class="np-legend-dot" style="background:#F1F5F9;border:1px solid #CBD5E1"></div><span class="np-legend-txt">Skipped</span></div>
+      </div>
+      <div class="np-scroll" id="nav-panel-content"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ CAT RESULT ══════════════════════════ -->
+  <div id="catresult" class="screen" style="background:var(--bg);">
+    <div class="top-bar">
+      <button class="back-btn" id="catresult-back">←</button>
+      <div class="tb-info">
+        <div class="tb-title" id="catresult-title"></div>
+        <div class="tb-sub">Category Results</div>
+      </div>
+      <div class="tb-badge">Ansell</div>
+    </div>
+    <div class="scroll-content" id="catresult-content"></div>
+  </div>
+
+  <!-- ══════════════════════════ RESULTS MODAL ══════════════════════════ -->
+  <div class="modal-bg" id="results-modal">
+    <div class="modal-sheet" id="results-modal-content"></div>
+  </div>
+
+</div>
+
+<!-- Hidden file input for photos -->
+<input type="file" id="photo-input" accept="image/*" multiple style="display:none" />
+<input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" />
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const CATS = [
+  {name:'Personnel',               color:'#38BDF8'},
+  {name:'Building & Facilities',   color:'#A78BFA'},
+  {name:'Equipment General',       color:'#FBBF24'},
+  {name:'Raw Materials',           color:'#F97316'},
+  {name:'Storage',                 color:'#84CC16'},
+  {name:'QA Laboratory',           color:'#EC4899'},
+  {name:'Compounding',             color:'#8B5CF6'},
+  {name:'Manufacturing',           color:'#EF4444'},
+  {name:'QC Inspection',           color:'#06B6D4'},
+  {name:'Post Processing',         color:'#0BA5A5'},
+  {name:'WIP Storage',             color:'#34D399'},
+  {name:'Packing',                 color:'#F59E0B'},
+  {name:'QA Final Inspection',     color:'#6366F1'},
+  {name:'FG Warehouse',            color:'#10B981'},
+  {name:'Sterilization',           color:'#F43F5E'},
+  {name:'Waste Water Treatment',   color:'#64748B'},
+];
+const CC = {};
+CATS.forEach(c => CC[c.name] = c.color);
+
+const ANSWERS = [
+  {value:'not_comply',       label:'Not Comply',       color:'#EF4444'},
+  {value:'partially_comply', label:'Partially Comply', color:'#F59E0B'},
+  {value:'comply',           label:'Comply',           color:'#10B981'},
+];
+const ANS_COLORS = {comply:'#10B981',partially_comply:'#F59E0B',not_comply:'#EF4444',na:'#94A3B8'};
+const ANS_LABELS = {comply:'Comply',partially_comply:'Partially Comply',not_comply:'Not Comply',na:'N/A'};
+
+const QS = [
+  // 1. PERSONNEL
+  {cat:'Personnel',sub:'',text:'Are employees trained to confine eating, drinking, gum chewing, and use of tobacco in designated areas only and never in the production environment/areas?'},
+  {cat:'Personnel',sub:'',text:'Does management take all reasonable measures and precautions to ensure cleanliness through hygienic practices?'},
+  {cat:'Personnel',sub:'',text:'Are employees who come into contact with products wearing the appropriate personal protective equipment to maintain cleanliness and prevent contamination (gloves, hair cap)?'},
+  {cat:'Personnel',sub:'',text:'Are gloves used for product handling in a clean sanitary condition?'},
+  {cat:'Personnel',sub:'',text:'Are employees trained to maintain adequate personal cleanliness?'},
+  {cat:'Personnel',sub:'',text:'Are employees trained to wash hands thoroughly before work and after each absence from their work station?'},
+  {cat:'Personnel',sub:'',text:'Are employees trained to wash hands thoroughly before work, after each absence from their work station and after leaving the restroom?'},
+  {cat:'Personnel',sub:'',text:'Are employees bringing personal items such as jewelry, watches, artificial nails, or false eyelashes into the designated area?'},
+  {cat:'Personnel',sub:'',text:'Are there established regulations for visitors and external personnel when entering the production area?'},
+  // 2. BUILDING & FACILITIES
+  {cat:'Building & Facilities',sub:'',text:'Are the building and facilities maintained in good repair?'},
+  {cat:'Building & Facilities',sub:'',text:'Are roads, yards and parking lots maintained to prevent sources of contamination?'},
+  {cat:'Building & Facilities',sub:'',text:'Is production area organized and cleaned?'},
+  {cat:'Building & Facilities',sub:'',text:'Are systems for waste treatment and disposal operated in a manner to protect against contamination?'},
+  {cat:'Building & Facilities',sub:'',text:'Does dripping or condensation from installations, ducts and pipes cause or could cause contamination or unsafe conditions for people and/or products?'},
+  {cat:'Building & Facilities',sub:'',text:'Are the production areas free from dusts and cobwebs?'},
+  {cat:'Building & Facilities',sub:'',text:'Are rubbish conveyed, stored, and disposed of in a proper manner?'},
+  {cat:'Building & Facilities',sub:'',text:'Is water used in process or cleaning equipment safe and of adequate sanitary quality?'},
+  {cat:'Building & Facilities',sub:'',text:'Are toilet facilities maintained in a sanitary condition and in good repair?'},
+  {cat:'Building & Facilities',sub:'',text:'Are hand-washing facilities adequate, convenient, and furnished with running water?'},
+  {cat:'Building & Facilities',sub:'',text:'Are hand-washing facilities furnished with adequate hand cleaning and sanitizing preparations?'},
+  {cat:'Building & Facilities',sub:'',text:'Are hand-washing stations equipped with sanitary towel service or suitable drying service?'},
+  {cat:'Building & Facilities',sub:'',text:'Are there readily understandable signs directing employees to wash and, where appropriate, sanitize their hands?'},
+  {cat:'Building & Facilities',sub:'',text:'Are effective measures taken to exclude pests from processing areas?'},
+  {cat:'Building & Facilities',sub:'',text:'Is there adequate screening or other protection against pests?'},
+  // 3. EQUIPMENT GENERAL
+  {cat:'Equipment General',sub:'',text:'Is equipment preventive maintenance plan defined?'},
+  {cat:'Equipment General',sub:'',text:'Are all equipment and utensils properly maintained?'},
+  {cat:'Equipment General',sub:'',text:'Are instruments and controls for measuring, regulating, or recording temperature, pH, water activity, acidity, etc. accurate (i.e. calibrated)?'},
+  {cat:'Equipment General',sub:'',text:'Are the equipment surfaces free from cracks, peeling paint, rusty and other defects?'},
+  {cat:'Equipment General',sub:'',text:'Is maintenance, repairing and calibration records available?'},
+  {cat:'Equipment General',sub:'',text:'Is the equipment used the most suitable for the task?'},
+  {cat:'Equipment General',sub:'',text:'Are the cleaning program/schedule records available?'},
+  {cat:'Equipment General',sub:'',text:'Is cleaning tools separated according to different hygiene-controlled areas?'},
+  // 4. RAW MATERIALS
+  {cat:'Raw Materials',sub:'',text:'Are raw material used to produce gloves covered by specifications?'},
+  {cat:'Raw Materials',sub:'',text:'Are specifications approved and dated by relevant person?'},
+  {cat:'Raw Materials',sub:'',text:'Is incoming raw material testing and sampling plan properly defined?'},
+  {cat:'Raw Materials',sub:'',text:'Is incoming raw material acceptance criteria properly defined?'},
+  {cat:'Raw Materials',sub:'',text:'Is incoming former receiving, testing and sampling well defined?'},
+  {cat:'Raw Materials',sub:'',text:'Is incoming packing material testing and sampling well defined?'},
+  {cat:'Raw Materials',sub:'',text:'Is incoming packing material acceptance criteria well defined?'},
+  {cat:'Raw Materials',sub:'',text:'Are IQC samples collected for testing identified on drums/bags/pallets of raw materials?'},
+  {cat:'Raw Materials',sub:'',text:'Raw material test results are properly maintained?'},
+  {cat:'Raw Materials',sub:'',text:'Are all chemicals in use within their expiration date?'},
+  {cat:'Raw Materials',sub:'',text:'Is chemical shelf life extension following procedures?'},
+  {cat:'Raw Materials',sub:'',text:'Are formers used to produce gloves covered by specifications?'},
+  {cat:'Raw Materials',sub:'',text:'Does formers specification cover length, weight & circumference (finger, palm, shank), wall thickness (palm, shank), and base slot dimensions?'},
+  {cat:'Raw Materials',sub:'',text:'Is incoming formers acceptance criteria well defined?'},
+  {cat:'Raw Materials',sub:'',text:'Procedure has been available for proceeding incoming failed raw materials/formers?'},
+  // 5. STORAGE
+  {cat:'Storage',sub:'',text:'Good housekeeping/5S, there is program to check and confirm safe working environment?'},
+  {cat:'Storage',sub:'',text:'Is the storage area free from dusts and cobwebs?'},
+  {cat:'Storage',sub:'',text:'Proper segregation of incoming raw materials and Finished product awaiting QA approval, approved materials and rejects?'},
+  {cat:'Storage',sub:'',text:'Raw materials and packaging materials and Finished product are stored appropriately with the proper labelling to avoid potential mix-ups?'},
+  {cat:'Storage',sub:'',text:'Do material labels include material identity, lot information, and control status?'},
+  {cat:'Storage',sub:'',text:'Material Traceability process properly defined and followed?'},
+  {cat:'Storage',sub:'',text:'No product packaging or materials are stored directly on the floor?'},
+  {cat:'Storage',sub:'',text:'Chemicals do not lean against wall or store near to wall?'},
+  {cat:'Storage',sub:'',text:'Environment control (temperature and humidity) in place, if applicable?'},
+  {cat:'Storage',sub:'',text:'Procedure for expired chemical handling and enforcement?'},
+  {cat:'Storage',sub:'',text:'FIFO procedure & enforcement in place?'},
+  {cat:'Storage',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'Storage',sub:'',text:'Pest control activities are in place?'},
+  {cat:'Storage',sub:'',text:'Warehouse Hygiene requirement (workers) properly defined?'},
+  {cat:'Storage',sub:'',text:'Are raw materials stored in accordance with MSDS recommendation (Temp/RH)?'},
+  {cat:'Storage',sub:'',text:'Are all chemicals stored in retention basins (in case of risk of chemical spillage)?'},
+  {cat:'Storage',sub:'',text:'Do these conditions ensure that the formers are not exposed to sunlight, rain, or dust?'},
+  {cat:'Storage',sub:'',text:'Are the formers stored in conditions that prevent contact between them?'},
+  {cat:'Storage',sub:'',text:'Are formers clearly identified, storage box for qty, size, hand, type of former & location?'},
+  {cat:'Storage',sub:'',text:'Offline former cleaning procedure available, cleaned formers shall be covered (protected from dust)?'},
+  {cat:'Storage',sub:'',text:'Pallets are in good condition - no broken parts?'},
+  // 6. QA LABORATORY
+  {cat:'QA Laboratory',sub:'',text:'Available SOP for test methods (FG) and followed?'},
+  {cat:'QA Laboratory',sub:'',text:'Acceptance criteria defined?'},
+  {cat:'QA Laboratory',sub:'',text:'Environment monitoring (temperature and humidity) is monitored and recorded?'},
+  {cat:'QA Laboratory',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'QA Laboratory',sub:'',text:'Equipments are calibrated and in a good condition?'},
+  {cat:'QA Laboratory',sub:'',text:'Proper attire of lab personnel?'},
+  // 7. COMPOUNDING - Chemical Dispersion
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'All storage vessels, tanks, containers, vats, and other holding containers for raw materials and product are properly labelled?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Area is organized and cleaned with no water remaining when not in use? Use dedicated storing tanks for dispersion?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Tanks/buckets segregated between ready to use and waiting for cleaning?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the raw materials correctly labelled, including control status?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Is the material and product traceability process properly defined and followed?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are process and product specification available, including all relevant information such as process parameters and product requirements?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the SOP, Specification or WI defining chemicals addition sequence, mixing times, maturation times, etc. available?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Is the Dispersion preparation following SOP, Specification or WI regarding chemicals addition sequence, mixing times, maturation times, etc.?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the testing and acceptance criteria for chemical dispersion properly defined?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the sampling plan and testing frequency for chemical dispersions properly defined?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Is there monitoring and measuring equipment available to test all parameters considered critical?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the scales and any other equipment used in the area in good condition, accurate and calibrated?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the equipments used the most suitable for the task?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Is particle size analysis for dispersion adequately defined and tested at least annually?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Do tanks have intermittent stirring? Is intermittent stirring properly defined and followed?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the chemicals stirred effectively before being added to the Latex compounds?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Equipment used included into maintenance preventive plan?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the equipment used free from hardened chemical residue, oil, dust, etc.?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Filters used in the process in good and clean condition?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'After use, are all equipment properly cleaned and stored?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are all chemicals stored in retention basins (in case of risk of chemical spillage)?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the chemicals SDS (Safety Data Sheet) available for consultation?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are all the equipments properly covered to protect it and for safety reasons when not in use?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the finished compound and dispersions correctly labelled, including control status?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the storage conditions defined? Is the maximum storage time for dispersions properly defined and followed?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Chemical dispersion preparation properly stored, conditioned (temp & RH) and well maintained?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Are the process control records available to document operating conditions, parameters, outcomes, deviations, incidents, or corrective actions?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Dirt catcher available below stirrer motor (in case of risk of dispersion contamination)?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Use stainless steel tools (when applicable)?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'DI water used for chemical dispersion preparation?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Inlet and outlet piping clearly labelled (from which tank, what solution)?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Dispersion Quality are acceptable to QA (no sedimentation/separation, no foaming, etc.)?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'QA testing are representative to expected Dispersion Quality?'},
+  {cat:'Compounding',sub:'Chemical Dispersion',text:'Safety equipments (eye washer, goggles etc.) are properly maintained and demarcated?'},
+  // 7b. Latex Compounding
+  {cat:'Compounding',sub:'Latex Compounding',text:'All storage vessels, tanks, containers, vats, and other holding containers for raw materials and product are properly labelled?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Area is organized and cleaned with no water remaining when not in use?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Tanks/buckets segregated between ready to use and waiting for cleaning?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the equipment used free from hardened chemical residue, oil, dust, etc.?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the raw materials correctly labelled, including control status?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Is the material and product traceability process properly defined and followed?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are process and product specification available, including all relevant information such as process parameters and product requirements?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the SOP, Specification or WI defining chemicals addition sequence, mixing times, maturation times, etc. available?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Is the Compounding and Dipping Solutions preparation following SOP, Specification or WI regarding chemicals addition sequence, mixing times, maturation times, etc.?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the testing and acceptance criteria for Compounding and Dipping Solutions testing properly defined?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the sampling plan and testing frequency for Compounding and Dipping Solutions testing properly defined?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Is there monitoring and measuring equipment available to test all parameters considered critical?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the scales and any other equipment used in the area in good condition, accurate and calibrated?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the equipments used the most suitable for the task?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Do Latex tanks have intermittent stirring? Is intermittent stirring properly defined and followed?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the chemicals stirred effectively before being added to the Latex compounds?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Equipment used included into maintenance preventive plan?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the equipment used free from hardened chemical residue, oil, dust, etc.?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'After use, are all equipment properly cleaned and stored?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are all chemicals stored in retention basins?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the chemicals SDS (Safety Data Sheet) available for consultation?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are all the equipments properly covered to protect it and for safety reasons when not in use?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the finished Compounding and Dipping Solutions correctly labelled, including control status?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the storage conditions defined? Is the maximum storage time for Compounding and Dipping Solutions properly defined and followed?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Chemical Compounding and Dipping Solutions preparation properly stored, conditioned (temp & RH) and well maintained?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Are the process control records available to document operating conditions, parameters, outcomes, deviations, incidents, or corrective actions?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Dirt catcher available below stirrer motor (in case of risk of dispersion contamination)?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Use stainless steel tools (when applicable)?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'DI water used for chemical dispersion preparation?'},
+  {cat:'Compounding',sub:'Latex Compounding',text:'Inlet and outlet piping clearly labelled (from which tank, what solution)?'},
+  // 8. MANUFACTURING
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'All storage vessels, tanks, containers, vats, and other holding containers for materials and product are properly labelled (production date, lot number)?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Area is organized and cleaned?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Tanks/buckets segregated between ready to use and waiting for cleaning?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Equipment used included into maintenance preventive plan?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Tank covers are closed and free from oil/dust/dirt particle?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Tank wall, stirrer shaft free from hardened/dry chemical residue?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Tank solution surface shall be clear of scum/foam?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Tank are without debris, grease and dirt accumulation?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Compound gauges and flow meters are calibrated?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Stirrers in good operation condition?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Material and product Traceability process properly defined and followed?'},
+  {cat:'Manufacturing',sub:'Feeding / Holding Tanks',text:'Dirt catcher available below stirrer motor (in case of risk of dispersion contamination)?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Is process specification available, including all relevant information for coagulant or pre-coagulant solution, such as temperature, agitating spec and others?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Are the solutions used correctly labelled, including control status?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Material and product Traceability process properly defined and followed?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Are operating procedures and WI available for the function?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Production parameters are in accordance with specification?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'All parameters are registered after measurement in accordance with instructions available?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Equipment used included into maintenance preventive plan?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Filters used in the process in good and clean condition?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Measuring and monitoring equipment in good conditions, accurate and calibrated?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Coagulant dipping area is organized and clean?'},
+  {cat:'Manufacturing',sub:'Dipping Process',text:'Are the process control records available to document operating conditions, parameters, outcomes, deviations, incidents, or corrective actions?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Tank are without debris, grease and dirt accumulation?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Surface of tank are without dust and dirt?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Tank top-up functional with overflow?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Tank level visual control available?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Tank solution at appropriate level?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Flow meter is in good condition, accurate and calibrated?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Area is organized and cleaned?'},
+  {cat:'Manufacturing',sub:'Hypo / Alkaline Tank',text:'Temperature defined and calibrated?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Tank are without debris, grease and dirt accumulation?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Surface of Tank are without dust and dirt?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Acid top-up functional?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Acid tank level visual control available?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Acid solution at appropriate level?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Flow meter is in good condition, accurate and calibrated?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Area is organized and cleaned?'},
+  {cat:'Manufacturing',sub:'Acid Tank',text:'Temperature defined and calibrated?'},
+  {cat:'Manufacturing',sub:'Water Spray Tank',text:'Water flowing smoothly without blockage?'},
+  {cat:'Manufacturing',sub:'Water Spray Tank',text:'Water aimed optimally at formers?'},
+  {cat:'Manufacturing',sub:'Water Spray Tank',text:'Water drained properly without any blockages?'},
+  {cat:'Manufacturing',sub:'Water Spray Tank',text:'Area is organized and cleaned?'},
+  {cat:'Manufacturing',sub:'Finger Crotch & Cuff Brush',text:'Brushing system visual standard available with brush location and rotation direction?'},
+  {cat:'Manufacturing',sub:'Finger Crotch & Cuff Brush',text:'Cleaning brush properly aligned to former?'},
+  {cat:'Manufacturing',sub:'Finger Crotch & Cuff Brush',text:'Brush not worn out, brushing formers effectively?'},
+  {cat:'Manufacturing',sub:'Finger Crotch & Cuff Brush',text:'Water sufficient for cleaning with brush?'},
+  {cat:'Manufacturing',sub:'Finger Crotch & Cuff Brush',text:'Brush dope cleaning condition acceptable?'},
+  {cat:'Manufacturing',sub:'Finger Crotch & Cuff Brush',text:'Is dope solution properly functioning in brush dope?'},
+  {cat:'Manufacturing',sub:'Rinse Tank',text:'Rinsing dip level system visual standard available?'},
+  {cat:'Manufacturing',sub:'Rinse Tank',text:'Water at appropriate level?'},
+  {cat:'Manufacturing',sub:'Rinse Tank',text:'No oily layer on surface of water?'},
+  {cat:'Manufacturing',sub:'Rinse Tank',text:'Water overflow sufficient?'},
+  {cat:'Manufacturing',sub:'Rinse Tank',text:'Flow meter is in good condition, accurate and calibrated?'},
+  {cat:'Manufacturing',sub:'Rinse Tank',text:'Temperature defined and calibrated?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'Filter in clean condition?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'No dust/dirt on surface of tank?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'Dope solution at appropriate level?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'Solution circulates well in tank?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'No flocculation/floating particle of coagulant (applicable for PFC)?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'Coagulant Temperature defined?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'Coagulant temperature probe calibrated?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Tank',text:'Coagulant concentration control in place (minimum water droplet carry over)?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Oven',text:'Oven doors closed?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Oven',text:'No broken formers which may cause touching in oven?'},
+  {cat:'Manufacturing',sub:'Dope / Coagulant Oven',text:'Oven air flow measurement is part of Maintenance Plan?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'Filter in clean condition?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'No dust/dirt on surface of tank?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'Latex at appropriate level?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'Latex circulates well in tank?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'Latex Temperature defined?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'Latex temperature probe calibrated?'},
+  {cat:'Manufacturing',sub:'Latex Dip Tank',text:'Viscosity, pH & TSC of Latex in tank controlled and recorded?'},
+  {cat:'Manufacturing',sub:'Leaching Tank',text:'Water at appropriate level?'},
+  {cat:'Manufacturing',sub:'Leaching Tank',text:'No oily layer on surface of water?'},
+  {cat:'Manufacturing',sub:'Leaching Tank',text:'Water overflow sufficient?'},
+  {cat:'Manufacturing',sub:'Leaching Tank',text:'Flow meter is in good condition, accurate and calibrated?'},
+  {cat:'Manufacturing',sub:'Leaching Tank',text:'Temperature defined and calibrated?'},
+  {cat:'Manufacturing',sub:'Chlorination Tank',text:'Concentration of chlorine defined and monitored?'},
+  {cat:'Manufacturing',sub:'Chlorination Tank',text:'Chlorination tank level visual control available?'},
+  {cat:'Manufacturing',sub:'Chlorination Tank',text:'Tank are without debris accumulation?'},
+  {cat:'Manufacturing',sub:'Chlorination Tank',text:'Area is organized and cleaned?'},
+  // 9. QC INSPECTION
+  {cat:'QC Inspection',sub:'',text:'Traceability & Identification maintained?'},
+  {cat:'QC Inspection',sub:'',text:'Equipment has cleaning and preventive maintenance plan?'},
+  {cat:'QC Inspection',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'QC Inspection',sub:'',text:'Are the rejection/acceptance criteria properly defined (TAMU/Sampling Plan)?'},
+  {cat:'QC Inspection',sub:'',text:'Is TAMU in good conditions?'},
+  {cat:'QC Inspection',sub:'',text:'All containers for product produced are properly labelled?'},
+  {cat:'QC Inspection',sub:'',text:'Proper inspection criterias have been defined?'},
+  {cat:'QC Inspection',sub:'',text:'SOP are available and followed for the function?'},
+  {cat:'QC Inspection',sub:'',text:'Required records maintained for the relevant function?'},
+  {cat:'QC Inspection',sub:'',text:'Are the process control records available to document the operating conditions, parameters, and outcomes?'},
+  // 10. POST PROCESSING
+  {cat:'Post Processing',sub:'',text:'Traceability & Identification maintained?'},
+  {cat:'Post Processing',sub:'',text:'Equipment has cleaning and preventive maintenance plan?'},
+  {cat:'Post Processing',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'Post Processing',sub:'',text:'Are the rejection/acceptance criteria properly defined?'},
+  {cat:'Post Processing',sub:'',text:'All containers for product produced are properly labelled?'},
+  {cat:'Post Processing',sub:'',text:'Proper processing criterias have been defined?'},
+  {cat:'Post Processing',sub:'',text:'SOP are available and followed for the function?'},
+  {cat:'Post Processing',sub:'',text:'Required records maintained for the relevant function?'},
+  {cat:'Post Processing',sub:'',text:'Are the process control records available to document the operating conditions, parameters, and outcomes?'},
+  // 11. WIP STORAGE
+  {cat:'WIP Storage',sub:'',text:'Good housekeeping/5S?'},
+  {cat:'WIP Storage',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'WIP Storage',sub:'',text:'Proper segregation of WIP products?'},
+  {cat:'WIP Storage',sub:'',text:'WIP products are stored appropriately with the proper labelling?'},
+  {cat:'WIP Storage',sub:'',text:'Do WIP labels include product identity, lot information, and control status?'},
+  {cat:'WIP Storage',sub:'',text:'No product or materials stored directly on the floor?'},
+  {cat:'WIP Storage',sub:'',text:'Environment control (temperature and humidity) in place, if applicable?'},
+  {cat:'WIP Storage',sub:'',text:'FIFO procedure & enforcement in place?'},
+  {cat:'WIP Storage',sub:'',text:'Pest control activities are in place?'},
+  // 12. PACKING
+  {cat:'Packing',sub:'',text:'All employees are following dressing code?'},
+  {cat:'Packing',sub:'',text:'Employees have been trained?'},
+  {cat:'Packing',sub:'',text:'Good housekeeping & safe working environment?'},
+  {cat:'Packing',sub:'',text:'Correct use of SOP document available and followed?'},
+  {cat:'Packing',sub:'',text:'Traceability & Identification maintained?'},
+  {cat:'Packing',sub:'',text:'Equipment has cleaning and preventive maintenance plan?'},
+  {cat:'Packing',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'Packing',sub:'',text:'Are the rejection/acceptance criteria properly defined?'},
+  {cat:'Packing',sub:'',text:'All containers for product produced are properly labelled?'},
+  {cat:'Packing',sub:'',text:'Packing material condition acceptable?'},
+  {cat:'Packing',sub:'',text:'SOP are available and followed for the function?'},
+  {cat:'Packing',sub:'',text:'Required records maintained for the relevant function?'},
+  // 13. QA FINAL INSPECTION
+  {cat:'QA Final Inspection',sub:'',text:'Traceability & Identification maintained?'},
+  {cat:'QA Final Inspection',sub:'',text:'Equipment has cleaning and preventive maintenance plan?'},
+  {cat:'QA Final Inspection',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'QA Final Inspection',sub:'',text:'Are the rejection/acceptance criteria properly defined (TAMU)?'},
+  {cat:'QA Final Inspection',sub:'',text:'Is TAMU in good conditions?'},
+  {cat:'QA Final Inspection',sub:'',text:'All containers for product produced are properly labelled?'},
+  {cat:'QA Final Inspection',sub:'',text:'Proper inspection criterias have been defined?'},
+  {cat:'QA Final Inspection',sub:'',text:'SOP are available and followed for the function?'},
+  {cat:'QA Final Inspection',sub:'',text:'Required records maintained for the relevant function?'},
+  {cat:'QA Final Inspection',sub:'',text:'Are the process control records available to document the operating conditions, parameters, and outcomes?'},
+  // 14. FG WAREHOUSE
+  {cat:'FG Warehouse',sub:'',text:'All employees are following dressing code: wearing gloves, shoe cover etc.?'},
+  {cat:'FG Warehouse',sub:'',text:'Employees have been trained?'},
+  {cat:'FG Warehouse',sub:'',text:'Good housekeeping & safe working environment?'},
+  {cat:'FG Warehouse',sub:'',text:'Correct use of SOP document available and followed?'},
+  {cat:'FG Warehouse',sub:'',text:'FIFO procedure & enforcement in place?'},
+  {cat:'FG Warehouse',sub:'',text:'Identification & traceability maintained?'},
+  {cat:'FG Warehouse',sub:'',text:'Packing material condition acceptable?'},
+  {cat:'FG Warehouse',sub:'',text:'Area is organized and cleaned?'},
+  // 15. STERILIZATION
+  {cat:'Sterilization',sub:'',text:'Product handling at irradiator follows proper procedure?'},
+  {cat:'Sterilization',sub:'',text:'Medical Examination for Irradiator Employees conducted?'},
+  {cat:'Sterilization',sub:'',text:'Proper identification for irradiated and non-irradiated cartons?'},
+  {cat:'Sterilization',sub:'',text:'Frequently monitoring and record maintenance in place?'},
+  {cat:'Sterilization',sub:'',text:'FIFO procedure & enforcement in place?'},
+  {cat:'Sterilization',sub:'',text:'Equipment has cleaning and preventive maintenance plan?'},
+  {cat:'Sterilization',sub:'',text:'Area is organized and cleaned?'},
+  // 16. WASTE WATER TREATMENT
+  {cat:'Waste Water Treatment',sub:'',text:'Area is organized and cleaned?'},
+  {cat:'Waste Water Treatment',sub:'',text:'All storage vessels, tanks, containers and holding containers are properly labelled. Equipment used for waste treatment included into maintenance preventive plan?'},
+  {cat:'Waste Water Treatment',sub:'',text:'Are the standard works and product specifications available for consultation?'},
+  {cat:'Waste Water Treatment',sub:'',text:'All parameters are according to specification?'},
+  {cat:'Waste Water Treatment',sub:'',text:'Waste separation is done correctly and current requirements are being met?'},
+  {cat:'Waste Water Treatment',sub:'',text:'Are the process control records available to document operating conditions, parameters, outcomes, deviations, incidents, or corrective actions?'},
+];
+
+// Assign indices
+const QSI = QS.map((q, i) => ({ ...q, i }));
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let state = {
+  page: 'home',
+  responses: {},
+  photos: {},    // { qIdx: [dataURL, ...] }
+  notes: {},
+  auditQs: [],
+  auditTitle: '',
+  auditIdx: 0,
+  auditTab: 'audit',
+  resultCat: '',
+};
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function goTo(page) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  state.page = page;
+  if (page === 'catselect') renderCatSelect();
+  if (page === 'audit') renderAuditTab();
+}
+
+// ─────────────────────────────────────────────
+// HOME
+// ─────────────────────────────────────────────
+document.getElementById('home-count').textContent =
+  `${QS.length} items · ${CATS.length} categories · 📷 Photo evidence · 📄 Export`;
+
+// ─────────────────────────────────────────────
+// CATEGORY SELECT
+// ─────────────────────────────────────────────
+function renderCatSelect() {
+  const totalAns = Object.keys(state.responses).length;
+  document.getElementById('cs-answered-lbl').textContent = `${totalAns} of ${QS.length} answered total`;
+  const c = document.getElementById('catselect-content');
+  let html = `
+    <div class="card" style="margin-bottom:12px;">
+      <p style="font-size:12px;color:var(--ts);line-height:1.7;">
+        Select a <strong>specific category</strong> to audit, or tap <strong>Audit All</strong>.
+        Completed categories show results when tapped. Add 📷 photos and notes as evidence, then export as PDF.
+      </p>
+    </div>
+    <button class="audit-all-btn" onclick="startAuditAll()">
+      <span style="font-size:18px;">📋</span>
+      <span class="audit-all-txt">Audit All Categories</span>
+    </button>
+  `;
+  CATS.forEach(cat => {
+    const catQs = QSI.filter(q => q.cat === cat.name);
+    const answered = catQs.filter(q => state.responses[q.i] !== undefined).length;
+    const total = catQs.length;
+    const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    const allDone = answered === total;
+    const totalPhotos = catQs.filter(q => (state.photos[q.i] || []).length > 0).length;
+    const badgeBg = allDone ? cat.color + '22' : answered > 0 ? '#F59E0B22' : '#F1F5F9';
+    const badgeColor = allDone ? cat.color : answered > 0 ? '#F59E0B' : '#94A3B8';
+    const badgeTxt = allDone ? '✓ Done' : answered > 0 ? pct + '%' : 'Not started';
+    const arrow = allDone ? '📊' : '›';
+    const onclick = allDone ? `viewCatResult('${cat.name}')` : `startAuditCat('${cat.name}')`;
+    html += `
+      <div class="cat-item" style="${allDone ? 'border:1.5px solid ' + cat.color + '44;' : ''}" onclick="${onclick}">
+        <div class="cat-bar" style="background:${cat.color};"></div>
+        <div class="cat-info">
+          <div class="cat-name">${cat.name}</div>
+          <div class="cat-meta">${total} questions${answered > 0 ? ` · ${answered} answered` : ''}${totalPhotos > 0 ? ` · 📷 ${totalPhotos}` : ''}</div>
+          <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%;background:${cat.color};"></div></div>
+        </div>
+        <div class="status-badge" style="background:${badgeBg};color:${badgeColor};">${badgeTxt}</div>
+        <div class="cat-arrow">${arrow}</div>
+      </div>
+    `;
+  });
+  c.innerHTML = html;
+}
+
+function startAuditAll() {
+  state.auditQs = QSI;
+  state.auditTitle = 'All Categories';
+  state.auditIdx = 0;
+  state.auditTab = 'audit';
+  goTo('audit');
+}
+
+function startAuditCat(catName) {
+  state.auditQs = QSI.filter(q => q.cat === catName);
+  state.auditTitle = catName;
+  state.auditIdx = 0;
+  state.auditTab = 'audit';
+  goTo('audit');
+}
+
+function viewCatResult(catName) {
+  state.resultCat = catName;
+  renderCatResult();
+  goTo('catresult');
+}
+
+// ─────────────────────────────────────────────
+// AUDIT SCREEN
+// ─────────────────────────────────────────────
+function switchTab(tab) {
+  state.auditTab = tab;
+  document.getElementById('tab-audit').classList.toggle('active', tab === 'audit');
+  document.getElementById('tab-settings').classList.toggle('active', tab === 'settings');
+  renderAuditTab();
+}
+
+function renderAuditTab() {
+  const qs = state.auditQs;
+  const idx = state.auditIdx;
+  const answered = qs.filter(q => state.responses[q.i] !== undefined).length;
+  const skipped = qs.length - answered;
+
+  document.getElementById('audit-title').textContent = state.auditTitle;
+  document.getElementById('audit-sub').textContent = `${answered} of ${qs.length} answered`;
+
+  const badge = document.getElementById('nav-badge');
+  if (skipped > 0) { badge.textContent = skipped; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
+
+  if (state.auditTab === 'audit') renderAuditQuestion();
+  else renderSettingsTab();
+}
+
+function renderAuditQuestion() {
+  const qs = state.auditQs;
+  const idx = state.auditIdx;
+  const q = qs[idx];
+  const total = qs.length;
+  const pct = Math.round(((idx + 1) / total) * 100);
+  const cc = CC[q.cat] || '#0BA5A5';
+  const isLast = idx === total - 1;
+  const qPhotos = state.photos[q.i] || [];
+  const qNote = state.notes[q.i] || '';
+  const curAns = state.responses[q.i];
+
+  let ansHtml = '';
+  ANSWERS.forEach(a => {
+    const sel = curAns === a.value;
+    ansHtml += `
+      <button class="ans-btn ${sel ? 'selected' : ''}" style="border-color:${a.color};${sel ? 'background:' + a.color + ';' : ''}"
+        onclick="pickAnswer('${a.value}')">
+        <div class="radio" style="border-color:${sel ? '#fff' : a.color};${sel ? 'background:' + a.color + ';' : ''}">
+          <span class="radio-check" style="${sel ? 'display:block' : ''}">✓</span>
+        </div>
+        <span class="ans-label" style="color:${sel ? '#fff' : a.color};">${a.label}</span>
+      </button>
+    `;
+  });
+  const naSel = curAns === 'na';
+  ansHtml += `
+    <button class="na-btn ${naSel ? 'selected' : ''}" onclick="pickAnswer('na')">
+      <div class="na-radio">−</div>
+      <span class="ans-label" style="color:${naSel ? '#64748B' : '#94A3B8'};">N/A — Not Applicable</span>
+    </button>
+  `;
+
+  let thumbsHtml = '';
+  qPhotos.forEach((src, pi) => {
+    thumbsHtml += `
+      <div class="photo-thumb-wrap">
+        <img class="photo-thumb" src="${src}" />
+        <button class="photo-del" onclick="removePhoto(${pi})">✕</button>
+      </div>
+    `;
+  });
+
+  const content = `
+    <div class="scroll-content" style="flex:1;overflow-y:auto;">
+      <div class="h-card">
+        <div class="prog-row">
+          <span class="prog-label">Q ${idx + 1} of ${total}</span>
+          <span class="prog-pct">${pct}%</span>
+        </div>
+        <div class="p-bar"><div class="p-fill" style="width:${pct}%;"></div></div>
+        <div class="badges-row">
+          <div class="c-badge" style="background:${cc}22;">
+            <div class="dot" style="background:${cc};"></div>
+            <span style="font-size:10px;font-weight:700;color:${cc};">${q.cat}</span>
+          </div>
+          ${q.sub ? `<div class="s-badge">${q.sub}</div>` : ''}
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:10px;">
+        <div class="q-label">${q.cat}${q.sub ? ' › ' + q.sub : ''}</div>
+        <div class="q-text">${q.text}</div>
+      </div>
+      ${ansHtml}
+      <div class="photo-section">
+        <div class="photo-header">
+          <span class="photo-title">📷 Evidence <span style="font-size:9px;color:#94A3B8;font-weight:400;">Optional</span></span>
+          <span class="photo-count">${qPhotos.length}/5</span>
+        </div>
+        <div class="photo-btns">
+          <button class="photo-btn" onclick="pickPhoto(true)">📷 Camera</button>
+          <button class="photo-btn" onclick="pickPhoto(false)">🖼️ Gallery</button>
+        </div>
+        ${thumbsHtml ? `<div class="photo-thumbs" id="photo-thumbs">${thumbsHtml}</div>` : '<div id="photo-thumbs"></div>'}
+        <textarea class="note-input" id="note-input" maxlength="200" placeholder="Add a note or observation (optional)...">${qNote}</textarea>
+        <div class="note-count" id="note-count">${qNote.length}/200</div>
+      </div>
+      <div class="nav-row">
+        <button class="nv-btn" style="background:var(--primary);" onclick="prevQ()" ${idx === 0 ? 'disabled' : ''}>◀ Prev</button>
+        ${isLast
+          ? `<button class="nv-btn" style="background:var(--success);" onclick="submitAudit()">Submit ✓</button>`
+          : `<button class="nv-btn" style="background:var(--primary2);" onclick="nextQ()">Next ▶</button>`
+        }
+      </div>
+    </div>
+  `;
+  document.getElementById('audit-tab-content').innerHTML = content;
+
+  document.getElementById('note-input').addEventListener('input', function () {
+    state.notes[q.i] = this.value.slice(0, 200);
+    document.getElementById('note-count').textContent = this.value.length + '/200';
+  });
+}
+
+function renderSettingsTab() {
+  const qs = state.auditQs;
+  const answered = qs.filter(q => state.responses[q.i] !== undefined).length;
+  const skipped = qs.length - answered;
+  const withPhotos = qs.filter(q => (state.photos[q.i] || []).length > 0).length;
+  const content = `
+    <div class="scroll-content" style="flex:1;overflow-y:auto;">
+      <div class="settings-logo">
+        <div class="settings-logo-name">Ansell</div>
+        <div class="settings-logo-line"></div>
+        <div class="settings-logo-sub">GMP Audit Progress</div>
+      </div>
+      <div class="card" style="margin-bottom:10px;">
+        <div class="card-title">Session Progress</div>
+        ${[['Total Questions', qs.length, 'var(--tp)'],['Answered', answered, 'var(--tp)'],
+           ['Skipped', skipped, skipped > 0 ? 'var(--error)' : 'var(--tp)'],
+           ['With Photos 📷', withPhotos, 'var(--primary)']].map(([l,v,c]) => `
+          <div class="prog-stat-row">
+            <span class="prog-stat-label">${l}</span>
+            <span class="prog-stat-val" style="color:${c};">${v}</span>
+          </div>
+        `).join('')}
+      </div>
+      <button class="nv-btn" style="background:#0C4A6E;border-radius:12px;padding:13px;margin-bottom:8px;width:100%;display:block;" onclick="exportPDF()">📄 Export PDF Report</button>
+      <button class="nv-btn" style="background:var(--error);border-radius:12px;padding:13px;margin-bottom:8px;width:100%;display:block;" onclick="confirmNewAudit()">↺ Start New Audit</button>
+      <button class="nv-btn" style="background:var(--primary);border-radius:12px;padding:13px;width:100%;display:block;" onclick="goTo('catselect')">← Back to Categories</button>
+    </div>
+  `;
+  document.getElementById('audit-tab-content').innerHTML = content;
+}
+
+function pickAnswer(val) {
+  const q = state.auditQs[state.auditIdx];
+  state.responses[q.i] = val;
+  renderAuditQuestion();
+}
+
+function prevQ() {
+  if (state.auditIdx > 0) { state.auditIdx--; renderAuditQuestion(); }
+}
+function nextQ() {
+  if (state.auditIdx < state.auditQs.length - 1) { state.auditIdx++; renderAuditQuestion(); }
+}
+
+function submitAudit() {
+  const left = state.auditQs.filter(q => state.responses[q.i] === undefined).length;
+  if (left > 0) {
+    openNavPanel();
+    alert(`${left} question${left > 1 ? 's' : ''} unanswered. Use the navigator to find them.`);
+    return;
+  }
+  openResultsModal();
+}
+
+function confirmNewAudit() {
+  if (confirm('Clear all responses and start new audit?')) {
+    state.responses = {};
+    state.photos = {};
+    state.notes = {};
+    state.auditIdx = 0;
+    goTo('catselect');
+  }
+}
+
+// ─────────────────────────────────────────────
+// PHOTOS
+// ─────────────────────────────────────────────
+let _photoCallback = null;
+document.getElementById('photo-input').addEventListener('change', function () {
+  handleFiles(this.files);
+  this.value = '';
+});
+document.getElementById('camera-input').addEventListener('change', function () {
+  handleFiles(this.files);
+  this.value = '';
+});
+
+function handleFiles(files) {
+  const q = state.auditQs[state.auditIdx];
+  const current = state.photos[q.i] || [];
+  const remaining = 5 - current.length;
+  if (remaining <= 0) { alert('Max 5 photos per question.'); return; }
+  const toAdd = Array.from(files).slice(0, remaining);
+  let loaded = 0;
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (!state.photos[q.i]) state.photos[q.i] = [];
+      state.photos[q.i].push(e.target.result);
+      loaded++;
+      if (loaded === toAdd.length) renderAuditQuestion();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function pickPhoto(useCamera) {
+  const q = state.auditQs[state.auditIdx];
+  const current = state.photos[q.i] || [];
+  if (current.length >= 5) { alert('Max 5 photos per question.'); return; }
+  if (useCamera) document.getElementById('camera-input').click();
+  else document.getElementById('photo-input').click();
+}
+
+function removePhoto(pi) {
+  const q = state.auditQs[state.auditIdx];
+  if (state.photos[q.i]) {
+    state.photos[q.i].splice(pi, 1);
+    renderAuditQuestion();
+  }
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATOR PANEL
+// ─────────────────────────────────────────────
+function openNavPanel() {
+  const qs = state.auditQs;
+  const skipped = qs.length - qs.filter(q => state.responses[q.i] !== undefined).length;
+  document.getElementById('nav-panel-sub').textContent = `${skipped} unanswered · tap to jump`;
+  const cats = [...new Set(qs.map(q => q.cat))];
+  let html = '';
+  cats.forEach(cat => {
+    const catQs = qs.map((q, li) => ({ ...q, li })).filter(q => q.cat === cat);
+    const color = CC[cat] || '#0BA5A5';
+    const catAns = catQs.filter(q => state.responses[q.i] !== undefined).length;
+    const subs = [...new Set(catQs.map(q => q.sub))];
+    html += `
+      <div style="margin-bottom:10px;">
+        <div class="np-cat-hd" style="background:${color}18;">
+          <span class="np-cat-name" style="color:${color};">${cat}</span>
+          <span class="np-cat-cnt" style="color:${catAns < catQs.length ? 'var(--error)' : color};">${catAns}/${catQs.length}</span>
+        </div>
+    `;
+    subs.forEach(sub => {
+      const subQs = catQs.filter(q => q.sub === sub);
+      if (sub) html += `<div class="np-sub-hd">› ${sub}</div>`;
+      html += `<div class="np-q-grid">`;
+      subQs.forEach(q => {
+        const ans = state.responses[q.i];
+        const hp = (state.photos[q.i] || []).length > 0;
+        const isCur = q.li === state.auditIdx;
+        const bg = ans ? ANS_COLORS[ans] : '#F8FAFC';
+        const bc = ans ? ANS_COLORS[ans] : '#CBD5E1';
+        const fc = ans ? '#fff' : '#94A3B8';
+        html += `
+          <button class="np-q-btn ${isCur ? 'current' : ''}"
+            style="background:${bg};border-color:${bc};color:${fc};"
+            onclick="jumpTo(${q.li})">
+            ${q.li + 1}
+            ${hp ? `<span class="photo-dot" style="background:${ans ? 'rgba(255,255,255,0.9)' : 'var(--primary)'}"></span>` : ''}
+          </button>
+        `;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('nav-panel-content').innerHTML = html;
+  document.getElementById('nav-panel').classList.remove('hidden');
+}
+
+function closeNavPanel() {
+  document.getElementById('nav-panel').classList.add('hidden');
+}
+
+function jumpTo(li) {
+  state.auditIdx = li;
+  state.auditTab = 'audit';
+  document.getElementById('tab-audit').classList.add('active');
+  document.getElementById('tab-settings').classList.remove('active');
+  closeNavPanel();
+  renderAuditQuestion();
+}
+
+// ─────────────────────────────────────────────
+// RESULTS MODAL
+// ─────────────────────────────────────────────
+function openResultsModal() {
+  const qs = state.auditQs;
+  const comply = qs.filter(q => state.responses[q.i] === 'comply').length;
+  const partial = qs.filter(q => state.responses[q.i] === 'partially_comply').length;
+  const notComply = qs.filter(q => state.responses[q.i] === 'not_comply').length;
+  const na = qs.filter(q => state.responses[q.i] === 'na').length;
+  const scored = comply + partial + notComply;
+  const score = scored > 0 ? Math.round(((comply + partial * 0.5) / scored) * 100) : 0;
+  const sc = score >= 75 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
+  const st = score >= 75 ? 'Good Standing' : score >= 50 ? 'Needs Improvement' : 'Action Required';
+
+  const catMap = {};
+  qs.forEach(q => {
+    if (!catMap[q.cat]) catMap[q.cat] = { comply: 0, partially_comply: 0, not_comply: 0, na: 0 };
+    if (state.responses[q.i]) catMap[q.cat][state.responses[q.i]]++;
+  });
+
+  let catHtml = '';
+  Object.entries(catMap).forEach(([name, d]) => {
+    catHtml += `
+      <div class="cat-bd-item">
+        <div class="cat-bd-name-row">
+          <div class="dot" style="background:${CC[name] || 'var(--primary)'};"></div>
+          <span class="cat-bd-name">${name}</span>
+        </div>
+        <div class="cat-bd-scores">
+          <span style="font-size:12px;color:#10B981;">✓ ${d.comply}</span>
+          <span style="font-size:12px;color:#F59E0B;">~ ${d.partially_comply}</span>
+          <span style="font-size:12px;color:#EF4444;">✗ ${d.not_comply}</span>
+          ${d.na > 0 ? `<span style="font-size:12px;color:#94A3B8;">N/A ${d.na}</span>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('results-modal-content').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">Audit Results</span>
+      <button class="modal-close" onclick="closeResultsModal()">✕</button>
+    </div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--ts);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Compliance Score</div>
+      <div style="font-size:48px;font-weight:800;color:${sc};">${score}%</div>
+      <div style="font-size:13px;font-weight:600;color:${sc};">${st}</div>
+    </div>
+    <button class="nv-btn" style="background:#0C4A6E;border-radius:12px;padding:13px;margin-bottom:14px;width:100%;display:block;" onclick="closeResultsModal();exportPDF();">📄 Export PDF Report</button>
+    <div class="card" style="background:#CFFAFE;border:1px solid var(--primary);margin-bottom:14px;">
+      <div class="card-title" style="margin-bottom:8px;">Overall Summary</div>
+      ${[['Total', qs.length, 'var(--tp)'],['Comply', comply, '#10B981'],['Partially Comply', partial, '#F59E0B'],['Not Comply', notComply, '#EF4444'],...(na?[['N/A', na, '#94A3B8']]:[])]
+        .map(([l,v,c]) => `<div class="summary-row"><span style="font-size:12px;font-weight:600;color:${c};">${l}:</span><span style="font-size:14px;font-weight:700;color:${c};">${v}</span></div>`).join('')}
+    </div>
+    <div class="card-title" style="margin-bottom:8px;">Category Breakdown</div>
+    <div class="cat-breakdown">${catHtml}</div>
+  `;
+  document.getElementById('results-modal').classList.add('open');
+}
+
+function closeResultsModal() {
+  document.getElementById('results-modal').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────
+// CATEGORY RESULT
+// ─────────────────────────────────────────────
+function renderCatResult() {
+  const catName = state.resultCat;
+  const color = CC[catName] || '#0BA5A5';
+  const catQs = QSI.filter(q => q.cat === catName);
+  const comply = catQs.filter(q => state.responses[q.i] === 'comply').length;
+  const partial = catQs.filter(q => state.responses[q.i] === 'partially_comply').length;
+  const notComply = catQs.filter(q => state.responses[q.i] === 'not_comply').length;
+  const na = catQs.filter(q => state.responses[q.i] === 'na').length;
+  const scored = comply + partial + notComply;
+  const score = scored > 0 ? Math.round(((comply + partial * 0.5) / scored) * 100) : 0;
+  const st = score >= 75 ? 'Good Standing' : score >= 50 ? 'Needs Improvement' : 'Action Required';
+
+  document.getElementById('catresult-title').textContent = catName;
+  document.getElementById('catresult-back').onclick = () => goTo('catselect');
+
+  let detailHtml = '';
+  catQs.forEach((q, li) => {
+    const ans = state.responses[q.i];
+    const ac = ans ? ANS_COLORS[ans] : '#CBD5E1';
+    const qp = state.photos[q.i] || [];
+    const qn = state.notes[q.i] || '';
+    let thumbs = qp.map(src => `<img src="${src}" style="width:52px;height:52px;border-radius:6px;border:1px solid var(--border);object-fit:cover;">`).join('');
+    detailHtml += `
+      <div class="q-detail-card" style="border-left-color:${ac};border-left-width:3px;">
+        ${q.sub ? `<div class="q-detail-sub">› ${q.sub}</div>` : ''}
+        <div class="q-detail-text">${q.text}</div>
+        <div class="ans-pill" style="background:${ac}22;color:${ac};">${ans ? ANS_LABELS[ans] : 'Unanswered'}</div>
+        ${thumbs ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">${thumbs}</div>` : ''}
+        ${qn ? `<div style="font-size:10px;color:#64748B;margin-top:5px;font-style:italic;background:#F8FAFC;padding:5px;border-radius:6px;">📝 ${qn}</div>` : ''}
+      </div>
+    `;
+  });
+
+  document.getElementById('catresult-content').innerHTML = `
+    <div class="cat-score-hero" style="background:${color};">
+      <div style="font-size:10px;color:rgba(255,255,255,0.8);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Compliance Score</div>
+      <div style="font-size:52px;font-weight:800;color:#fff;line-height:1;">${score}%</div>
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:4px;">${st}</div>
+    </div>
+    <button class="nv-btn" style="background:#0C4A6E;border-radius:12px;padding:13px;margin-bottom:12px;width:100%;display:block;" onclick="exportCatPDF('${catName}')">📄 Export PDF Report</button>
+    <div class="card" style="background:#CFFAFE;border:1px solid var(--primary);margin-bottom:12px;">
+      <div class="card-title" style="margin-bottom:8px;">Summary — ${catName}</div>
+      ${[['Total Questions', catQs.length, 'var(--tp)'],['Comply', comply, '#10B981'],['Partially Comply', partial, '#F59E0B'],['Not Comply', notComply, '#EF4444'],...(na?[['N/A', na, '#94A3B8']]:[])]
+        .map(([l,v,c]) => `<div class="summary-row"><span style="font-size:12px;font-weight:600;color:${c};">${l}</span><span style="font-size:13px;font-weight:700;color:${c};">${v}</span></div>`).join('')}
+    </div>
+    <div class="card-title" style="margin-bottom:8px;">Question Details</div>
+    ${detailHtml}
+    <button class="nv-btn" style="background:${color};border-radius:12px;padding:14px;margin-top:8px;width:100%;display:block;" onclick="startAuditCat('${catName}');goTo('audit');">Re-audit ${catName}</button>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// PDF EXPORT
+// ─────────────────────────────────────────────
+function generatePDFHTML(qs, title, responses, photos, notes) {
+  const now = new Date();
+  const comply = qs.filter(q => responses[q.i] === 'comply').length;
+  const partial = qs.filter(q => responses[q.i] === 'partially_comply').length;
+  const notComply = qs.filter(q => responses[q.i] === 'not_comply').length;
+  const na = qs.filter(q => responses[q.i] === 'na').length;
+  const scored = comply + partial + notComply;
+  const score = scored > 0 ? Math.round(((comply + partial * 0.5) / scored) * 100) : 0;
+  const sc = score >= 75 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
+  const st = score >= 75 ? 'Good Standing' : score >= 50 ? 'Needs Improvement' : 'Action Required';
+
+  const catMap = {};
+  qs.forEach(q => {
+    if (!catMap[q.cat]) catMap[q.cat] = { comply: 0, partially_comply: 0, not_comply: 0, na: 0, qs: [] };
+    if (responses[q.i]) catMap[q.cat][responses[q.i]]++;
+    catMap[q.cat].qs.push(q);
+  });
+
+  let html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ansell GMP Audit</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;padding:20px;color:#1a1a1a;font-size:12px;}
+    .header{background:linear-gradient(135deg,#0BA5A5,#07C4C4);padding:24px;border-radius:10px;color:#fff;margin-bottom:20px;text-align:center;}
+    .brand{font-size:36px;font-weight:900;letter-spacing:-2px;}
+    .score-box{text-align:center;padding:16px;margin-bottom:20px;border:2px solid ${sc};border-radius:10px;}
+    .score-num{font-size:52px;font-weight:900;color:${sc};}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+    .scard{background:#f5f5f5;border-radius:8px;padding:10px;text-align:center;}
+    .snum{font-size:22px;font-weight:800;}
+    .cat-section{margin-bottom:14px;border:1px solid #ddd;border-radius:8px;overflow:hidden;}
+    .cat-hd{padding:10px 14px;font-weight:700;font-size:13px;color:#fff;display:flex;justify-content:space-between;}
+    .q-row{padding:8px 14px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:flex-start;}
+    .q-row:last-child{border-bottom:none;}
+    .q-n{font-size:10px;color:#999;min-width:22px;margin-top:1px;}
+    .q-body{flex:1;}
+    .q-sub{font-size:9px;color:#0BA5A5;font-weight:600;margin-bottom:2px;}
+    .q-t{font-size:11px;line-height:1.5;color:#333;}
+    .q-a{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;align-self:flex-start;flex-shrink:0;margin-top:1px;}
+    .q-note{font-size:10px;color:#666;font-style:italic;margin-top:4px;background:#f9f9f9;padding:4px 6px;border-radius:4px;}
+    .footer{text-align:center;color:#aaa;font-size:10px;margin-top:20px;padding-top:12px;border-top:1px solid #eee;}
+  </style></head><body>
+  <div class="header">
+    <div class="brand">Ansell</div>
+    <div style="font-size:15px;font-weight:600;opacity:0.9;margin-top:4px;">GMP Audit Report — ${title}</div>
+    <div style="font-size:11px;opacity:0.7;margin-top:3px;">Generated: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}</div>
+  </div>
+  <div class="score-box">
+    <div style="font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Overall Compliance Score</div>
+    <div class="score-num">${score}%</div>
+    <div style="font-size:14px;font-weight:600;color:${sc};">${st}</div>
+  </div>
+  <div class="grid4">
+    <div class="scard"><div class="snum" style="color:#0BA5A5;">${qs.length}</div><div style="font-size:10px;color:#666;">Total</div></div>
+    <div class="scard"><div class="snum" style="color:#10B981;">${comply}</div><div style="font-size:10px;color:#666;">Comply</div></div>
+    <div class="scard"><div class="snum" style="color:#F59E0B;">${partial}</div><div style="font-size:10px;color:#666;">Partial</div></div>
+    <div class="scard"><div class="snum" style="color:#EF4444;">${notComply}</div><div style="font-size:10px;color:#666;">Not Comply</div></div>
+  </div>`;
+
+  Object.entries(catMap).forEach(([cat, d]) => {
+    const color = CC[cat] || '#0BA5A5';
+    const cs = d.comply + d.partially_comply + d.not_comply;
+    const cscore = cs > 0 ? Math.round(((d.comply + d.partially_comply * 0.5) / cs) * 100) : 0;
+    html += `<div class="cat-section">
+      <div class="cat-hd" style="background:${color};">
+        ${cat}
+        <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:1px 8px;border-radius:8px;">${cscore}% — ✓${d.comply} ~${d.partially_comply} ✗${d.not_comply}${d.na?' N/A:'+d.na:''}</span>
+      </div>`;
+    d.qs.forEach((q, li) => {
+      const ans = responses[q.i];
+      const ac = ans ? ANS_COLORS[ans] : '#CBD5E1';
+      const al = ans ? ANS_LABELS[ans] : 'Unanswered';
+      const note = notes[q.i] || '';
+      const hp = (photos[q.i] || []).length;
+      html += `<div class="q-row">
+        <div class="q-n">${li + 1}</div>
+        <div class="q-body">
+          ${q.sub ? `<div class="q-sub">› ${q.sub}</div>` : ''}
+          <div class="q-t">${q.text}${hp > 0 ? ` <span style="color:#0BA5A5;font-size:9px;">📷 ${hp} photo${hp > 1 ? 's' : ''}</span>` : ''}</div>
+          ${note ? `<div class="q-note">📝 ${note}</div>` : ''}
+        </div>
+        <div class="q-a" style="background:${ac}22;color:${ac};">${al}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `<div class="footer">Ansell Lanka (Pvt) Ltd · GMP Audit Checklist · Biyagama Export Processing Zone</div></body></html>`;
+  return html;
+}
+
+function exportPDF() {
+  const html = generatePDFHTML(state.auditQs, state.auditTitle, state.responses, state.photos, state.notes);
+  printHTML(html);
+}
+
+function exportCatPDF(catName) {
+  const catQs = QSI.filter(q => q.cat === catName);
+  const html = generatePDFHTML(catQs, catName, state.responses, state.photos, state.notes);
+  printHTML(html);
+}
+
+function printHTML(html) {
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 500);
+}
+
+// ─────────────────────────────────────────────
+// SERVICE WORKER
+// ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
